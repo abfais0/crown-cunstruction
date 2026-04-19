@@ -3,7 +3,18 @@ import { MessageCircle, X, Send, Loader2, Bot } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { GoogleGenAI } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+// Lazy initialize to avoid top-level crashes if environment variables are missing
+let ai: GoogleGenAI | null = null;
+const getAI = () => {
+  if (!ai) {
+    const apiKey = ((import.meta as any).env?.VITE_GEMINI_API_KEY || (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY) || "");
+    if (!apiKey) {
+      console.warn("GEMINI_API_KEY is missing. ChatBot will not function correctly.");
+    }
+    ai = new GoogleGenAI({ apiKey });
+  }
+  return ai;
+};
 
 interface Message {
   role: "user" | "model";
@@ -40,8 +51,9 @@ export default function ChatBot() {
     setIsLoading(true);
 
     try {
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+      const chat = getAI();
+      const response = await chat.models.generateContent({
+        model: "gemini-1.5-flash",
         contents: [...messages, { role: "user", text: userMessage }].map(m => ({
           role: m.role,
           parts: [{ text: m.text }]
