@@ -1,0 +1,8 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "crownline-construction"
+compatibility_date = "2024-04-14"
+pages_build_output_dir = "dist"
+
+[vars]
+# Add your environment variables here if needed
+# GEMINI_API_KEY = "your-api-key"
